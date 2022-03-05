@@ -1,7 +1,7 @@
 class Api::UsersController < ApplicationController
   #before_action :authenticate_request!, except: [:create, :login]
   
-  def create
+  def create # POST api/users
     user = User.new(user_params)
   
     if user.save && user.authenticate(params[:password])
@@ -12,7 +12,7 @@ class Api::UsersController < ApplicationController
     end
   end
 
-  def login
+  def login # POST api/users/login
     user = User.find_by(email: params[:email])
 
     if user&.authenticate(user_params[:password])
