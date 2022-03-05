@@ -27,8 +27,8 @@ class ApplicationController < ActionController::API
     nil
   end
 
-  # Sets the @current_user with the user_id from payload
+  # Sets the @current_user with the user_id from payload or does forced return if payload is nil
   def load_current_user!
-    @current_user = User.find_by(id: payload[0]['user_id'])
+    payload.nil? ? return : @current_user = User.find_by(id: payload[0]['user_id'])
   end
 end
