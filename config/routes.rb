@@ -9,7 +9,7 @@ Rails.application.routes.draw do
     resources :study_lists
     post 'study_lists/:id/game', to: 'study_lists#game'
     get 'study_lists/:study_list_id/words', to: 'words#index'
-    get 'study_lists/:study_lsit_id/words/synonyms', to: "synoynyms#index"
+    get 'study_lists/:study_list_id/words/synonyms', to: "synonyms#index"
     resource :synonyms
   end
   # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
