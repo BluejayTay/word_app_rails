@@ -2,7 +2,7 @@ class Api::StudyListsController < ApplicationController
   before_action :authenticate_request!, except: [:new_game, :index]
   before_action :load_current_user!
   before_action :set_list, only: [:new_game, :show, :update, :destroy]
-  def new_game # POST api/study_lists/:id/new_game
+  def new_game # GET api/study_lists/:id/new_game
     game_synonyms = []
     (@study_list.words).each do |word|
       (word.synonyms).each_with_index do |synonym, index|
@@ -12,6 +12,7 @@ class Api::StudyListsController < ApplicationController
     end
       
     render json: {
+      title: @study_list.title,
       words: @study_list.words,
       synonyms: game_synonyms
     }
