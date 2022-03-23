@@ -4,7 +4,9 @@ class Api::StudyListsController < ApplicationController
   before_action :set_list, only: [:new_game, :show, :update, :destroy]
   def new_game # GET api/study_lists/:id/new_game
     game_synonyms = []
+    
     (@study_list.words).each do |word|
+      #@match_index = @study_list.words.index(word)
       (word.synonyms).each_with_index do |synonym, index|
         @game_synonym = (word.synonyms)[(rand((word.synonyms).count))]
       end
@@ -13,8 +15,8 @@ class Api::StudyListsController < ApplicationController
       
     render json: {
       title: @study_list.title,
-      words: @study_list.words,
-      synonyms: game_synonyms
+      words: (@study_list.words).map {|word| WordSerializer.new(word)},
+      synonyms: game_synonyms.map {|synonym| SynonymSerializer.new(synonym)}
     }
   end
 
