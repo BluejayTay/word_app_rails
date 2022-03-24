@@ -3,20 +3,19 @@ class Api::StudyListsController < ApplicationController
   before_action :load_current_user!
   before_action :set_list, only: [:new_game, :show, :update, :destroy]
   def new_game # GET api/study_lists/:id/new_game
-    game_synonyms = []
+    @game_synonyms = []
     
-    (@study_list.words).each do |word|
-      #@match_index = @study_list.words.index(word)
+    game_words.each do |word|
       (word.synonyms).each_with_index do |synonym, index|
         @game_synonym = (word.synonyms)[(rand((word.synonyms).count))]
       end
-      game_synonyms << @game_synonym
+      @game_synonyms << @game_synonym
     end
       
     render json: {
       title: @study_list.title,
-      words: (@study_list.words).map {|word| WordSerializer.new(word)},
-      synonyms: game_synonyms.map {|synonym| SynonymSerializer.new(synonym)}
+      words: game_words.map {|word| {id: word.id, name: word.name, definition: word.definition, match_index: game_words.index(word)}},
+      synonyms: @game_synonyms.map {|synonym| {id: synonym.id, name: synonym.name, match_index: (@game_synonyms.index(synonym))}}
     }
   end
 
@@ -26,11 +25,11 @@ class Api::StudyListsController < ApplicationController
     words.each do |word|
       if Word.find_by(name: word)
         word_to_add = Word.find_by(name: word)
-        @study_list.words << word_to_add 
+        game_words << word_to_add 
       else
         result = ThesaurusService.look_up(word)
         created_word = Word.create!(name: result['meta']['id'], definition: result['shortdef'].join("; ").to_s)
-        @study_list.words << created_word
+        game_words << created_word
         synonyms = result['meta']['syns'][0]
         synonyms.each do |synonym|
           if Synonym.find_by(name: synonym)
@@ -45,7 +44,7 @@ class Api::StudyListsController < ApplicationController
     end
     render json: {
       study_list: @study_list,
-      added_word: @study_list.words
+      added_words: game_words
     }
   end
     
@@ -84,6 +83,10 @@ class Api::StudyListsController < ApplicationController
   end
 
   private
+
+  def game_words
+    @study_list.words
+  end
 
   def base_study_lists
     StudyList.all.where(user_id: nil)
