@@ -1,19 +1,20 @@
 class Api::StudyListsController < ApplicationController
-  before_action :authenticate_request!, except: [:new_game, :index]
+  before_action :authenticate_request!, except: [:new_game, :index, :update]
   before_action :load_current_user!
   before_action :set_list, only: [:new_game, :show, :update, :destroy]
   def new_game # GET api/study_lists/:id/new_game
     @game_synonyms = []
     
     game_words.each do |word|
+      synonym_count = word.synonyms.count
       (word.synonyms).each_with_index do |synonym, index|
-        @game_synonym = (word.synonyms)[(rand((word.synonyms).count))]
+        @game_synonym = (word.synonyms)[(rand(synonym_count))]
       end
       @game_synonyms << @game_synonym
     end
       
     render json: {
-      title: @study_list.title,
+      study_list: StudyListSerializer.new(@study_list),
       words: game_words.map {|word| {id: word.id, name: word.name, definition: word.definition, match_index: game_words.index(word)}},
       synonyms: @game_synonyms.map {|synonym| {id: synonym.id, name: synonym.name, match_index: (@game_synonyms.index(synonym))}}
     }
@@ -43,7 +44,7 @@ class Api::StudyListsController < ApplicationController
       end
     end
     render json: {
-      study_list: @study_list,
+      study_list: StudyListSerializer.new(@study_list),
       added_words: game_words
     }
   end
