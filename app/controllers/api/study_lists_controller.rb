@@ -1,7 +1,7 @@
 class Api::StudyListsController < ApplicationController
   before_action :authenticate_request!, except: [:new_game, :index, :update]
   before_action :load_current_user!
-  before_action :set_list, only: [:new_game, :show, :update, :destroy]
+  before_action :set_list, only: [:new_game, :add_words, :show, :update, :destroy]
   def new_game # GET api/study_lists/:id/new_game
     @game_synonyms = []
     
@@ -21,28 +21,26 @@ class Api::StudyListsController < ApplicationController
   end
 
   def add_words # POST api/study_lists/:id/words
-    @study_list = StudyList.find(params[:id])
-    words = params[:words].split()
+    words = params[:words].split(",")
+
     words.each do |word|
       if Word.find_by(name: word)
         word_to_add = Word.find_by(name: word)
         game_words << word_to_add 
-      else
+      elsif
         result = ThesaurusService.look_up(word)
         created_word = Word.create!(name: result['meta']['id'], definition: result['shortdef'].join("; ").to_s)
         game_words << created_word
         synonyms = result['meta']['syns'][0]
         synonyms.each do |synonym|
-          if Synonym.find_by(name: synonym)
-            synonym_to_add = Synonym.find_by(name: synonym.to_s)
-            created_word.synonyms << synonym_to_add
-          else
-            created_synonym = Synonym.create!(name: synonym.to_s)
-            created_word.synonyms << created_synonym
-          end
+          synonym_to_add = Synonym.find_or_create_by!(name: synonym)
+          created_word.synonyms << synonym_to_add
         end
+      else 
+        next
       end
     end
+
     render json: {
       study_list: StudyListSerializer.new(@study_list),
       added_words: game_words
