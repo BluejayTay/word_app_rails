@@ -36,8 +36,7 @@ class Api::StudyListsController < ApplicationController
       if Word.find_by(name: word)
         word_to_add = Word.find_by(name: word)
         @study_list.words << word_to_add 
-      elsif
-        result = ThesaurusService.look_up(word)
+      elsif result = ThesaurusService.look_up(word)
         created_word = Word.create!(name: result['meta']['id'], definition: result['shortdef'].join("; ").to_s)
         @study_list.words << created_word
         synonyms = result['meta']['syns'][0]
@@ -45,8 +44,7 @@ class Api::StudyListsController < ApplicationController
           synonym_to_add = Synonym.find_or_create_by!(name: synonym)
           created_word.synonyms << synonym_to_add
         end
-      else 
-        next
+      else next
       end
     end
 
