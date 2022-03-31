@@ -4,7 +4,7 @@ class Api::UsersController < ApplicationController
   def create # POST api/users
     user = User.new(user_params)
   
-    if user.save && user.authenticate(params[:password])
+    if user.save && user.authenticate(user_params[:password])
       auth_token = JsonWebToken.encode(user_id: user.id)
       render json: { user: { id: user.id, email: user.email}, auth_token: auth_token }, status: :ok
     else
