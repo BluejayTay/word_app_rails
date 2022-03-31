@@ -13,7 +13,7 @@ class Api::UsersController < ApplicationController
   end
 
   def login # POST api/users/login
-    user = User.find_by(email: params[:email])
+    user = User.find_by(email: user_params[:email])
 
     if user&.authenticate(user_params[:password])
       auth_token = JsonWebToken.encode(user_id: user.id)
@@ -24,9 +24,9 @@ class Api::UsersController < ApplicationController
   end
 
   def auto_login # GET api/users/auto_login
-    #if payload
+    if payload
       render json: {payload: payload, user: { id: @current_user.id, email: @current_user.email} }
-    #end
+    end
   end
 
   def show # GET api/users/:id
@@ -36,6 +36,6 @@ class Api::UsersController < ApplicationController
   private
 
   def user_params
-    params.permit(:email, :password)
+    params.require(:user).permit(:email, :password)
   end
 end
