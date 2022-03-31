@@ -1,12 +1,12 @@
 class Api::UsersController < ApplicationController
-  #before_action :authenticate_request!, except: [:create, :login]
+  before_action :authenticate_request!, only: [:auto_login, :show]
   
   def create # POST api/users
     user = User.new(user_params)
   
     if user.save && user.authenticate(params[:password])
       auth_token = JsonWebToken.encode(user_id: user.id)
-      render json: { auth_token: auth_token }, status: :ok
+      render json: { user: { id: user.id, email: user.email}, auth_token: auth_token }, status: :ok
     else
       render json: user.errors, status: :unprocessable_entity
     end
@@ -17,11 +17,21 @@ class Api::UsersController < ApplicationController
 
     if user&.authenticate(user_params[:password])
       auth_token = JsonWebToken.encode(user_id: user.id)
-      render json: { auth_token: auth_token }, status: :ok
+      render json: { user: { id: user.id, email: user.email}, auth_token: auth_token }, status: :ok
     else
       render json: { error: 'Invalid username/password' }, status: :unauthorized
     end
   end
+
+  def auto_login # GET api/users/auto_login
+    #if payload
+      render json: {payload: payload, user: { id: @current_user.id, email: @current_user.email} }
+    #end
+  end
+
+  def show # GET api/users/:id
+    render json: {user_id: @current_user.id, user_email: @current_user.email }
+  end 
   
   private
 
