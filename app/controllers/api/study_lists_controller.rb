@@ -1,5 +1,5 @@
 class Api::StudyListsController < ApplicationController
-  before_action :authenticate_request!, except: [:new_game, :index]
+  before_action :authenticate_request!, except: [:new_game, :index, :update]
   before_action :set_list, only: [:new_game, :show, :update, :destroy]
   
   def new_game # GET api/study_lists/:id/new_game
@@ -21,7 +21,12 @@ class Api::StudyListsController < ApplicationController
   end
     
   def index # GET api/study_lists
-    @study_lists = base_study_lists
+    if payload
+      load_current_user!
+      @study_lists = base_study_lists + user_study_lists
+    else 
+      @study_lists = base_study_lists
+    end
     render json: @study_lists
   end
   
@@ -31,6 +36,7 @@ class Api::StudyListsController < ApplicationController
   
   def create # POST api/study_lists
     @study_list = StudyList.create(study_list_params)
+
     words = params[:words]
     words.each do |word|
       if Word.find_by(name: word)
@@ -66,8 +72,12 @@ class Api::StudyListsController < ApplicationController
 
   private
 
+  def user_study_lists
+    StudyList.all.where(user_id: @current_user.id)
+  end
+
   def base_study_lists
-    StudyList.all.where(user_id: nil)
+    StudyList.all.where(user_id: nil).order(title: :asc)
   end
 
   def study_list_params
@@ -80,5 +90,5 @@ class Api::StudyListsController < ApplicationController
 end
 
 
-#Parameters: {"title"=>"test", "words"=>["test", "word"], "study_list"=>{"title"=>"test"}}
+
 #Parameters: {"study_list"=>{"title"=>"heloooooo"}, "words"=>["test", "world"]}
