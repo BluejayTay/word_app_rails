@@ -1,7 +1,7 @@
 require 'jwt'
 
 class JsonWebToken
-  # Encodes and signs the payload (e.g. the user email) using our app's secret key
+  # Encodes and signs the payload using secret key
   # The result also includes the expiration date.
   def self.encode(payload)
     payload.reverse_merge!(meta)
@@ -25,8 +25,8 @@ class JsonWebToken
   # Default options to be encoded in the token
   def self.meta
     {
-      exp: 7.days.from_now.to_i,
-      iss: 'issuer_name',
+      exp: 2.days.from_now.to_i,
+      iss: 'WerdNerd',
       aud: 'client',
     }
   end
