@@ -28,10 +28,6 @@ class Api::UsersController < ApplicationController
       render json: {payload: payload, user: { id: @current_user.id, email: @current_user.email} }
     end
   end
-
-  def show # GET api/users/:id
-    render json: {user_id: @current_user.id, user_email: @current_user.email }
-  end 
   
   private
 
