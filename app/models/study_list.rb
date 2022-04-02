@@ -9,8 +9,8 @@ class StudyList < ApplicationRecord
   end
 
   def valid_word_count
-    if self.words.count > 10
-      errors.add(:word_count, "Must be less than or equal to 10")
+    if ((self.words.count > 10) || (self.words.count < 1))
+      errors.add(:word_count, "A list must have between 1-10 words")
     end
   end
 
