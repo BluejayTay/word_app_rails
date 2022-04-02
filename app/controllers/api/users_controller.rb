@@ -25,7 +25,7 @@ class Api::UsersController < ApplicationController
 
   def auto_login # GET api/users/auto_login
     if payload
-      render json: {payload: payload, user: { id: @current_user.id, email: @current_user.email} }
+      render json: {user: { id: @current_user.id, email: @current_user.email} }
     end
   end
   
