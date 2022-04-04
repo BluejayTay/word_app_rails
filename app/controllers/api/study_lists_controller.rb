@@ -1,7 +1,8 @@
 class Api::StudyListsController < ApplicationController
   before_action :authenticate_request!, except: [:new_game, :index, :update]
   before_action :set_list, only: [:new_game, :show, :update, :destroy]
-  
+  before_action :validate_params, only: :create
+
   def new_game # GET api/study_lists/:id/new_game
     @game_synonyms = []
     
@@ -42,7 +43,6 @@ class Api::StudyListsController < ApplicationController
   def create # POST api/study_lists
     @study_list = StudyList.create(study_list_params)
 
-    submitted_words = params[:words]
     submitted_words.each do |word|
       if Word.find_by(name: word)
         databased_word = Word.find_by(name: word)
@@ -56,7 +56,7 @@ class Api::StudyListsController < ApplicationController
           new_word.synonyms << new_or_databased_synonym
         end
       else next
-      end
+      end 
     end
 
     render json: {study_list: {title: @study_list.title, words: words}}
@@ -94,5 +94,13 @@ class Api::StudyListsController < ApplicationController
 
   def set_list
     @study_list = StudyList.find(params[:id])
+  end
+
+  def submitted_words
+    params[:words]
+  end
+
+  def validate_params
+    raise if submitted_words.empty? || (submitted_words.length > 10) || (params[:study_list][:title].blank?)
   end
 end
