@@ -1,10 +1,11 @@
 class Api::UsersController < ApplicationController
   before_action :authenticate_request!, only: [:auto_login, :show]
+  before_action :validate_params, only: :create
   
   def create # POST api/users
     user = User.new(user_params)
   
-    if user.save && user.authenticate(user_params[:password])
+    if user.save && user.authenticate(password)
       auth_token = JsonWebToken.encode(user_id: user.id)
       render json: { user: { id: user.id, email: user.email}, auth_token: auth_token }, status: :ok
     else
@@ -13,9 +14,9 @@ class Api::UsersController < ApplicationController
   end
 
   def login # POST api/users/login
-    user = User.find_by(email: user_params[:email])
+    user = User.find_by(email: email)
 
-    if user&.authenticate(user_params[:password])
+    if user&.authenticate(password)
       auth_token = JsonWebToken.encode(user_id: user.id)
       render json: { user: { id: user.id, email: user.email}, auth_token: auth_token }, status: :ok
     else
@@ -33,5 +34,17 @@ class Api::UsersController < ApplicationController
 
   def user_params
     params.require(:user).permit(:email, :password, :password_confirmation)
+  end
+
+  def email
+    user_params[:email]
+  end
+
+  def password
+    user_params[:password]
+  end
+
+  def validate_params
+    raise if email.empty? || password.empty?
   end
 end
