@@ -5,12 +5,12 @@ class JsonWebToken
   # The result also includes the expiration date.
   def self.encode(payload)
     payload.reverse_merge!(meta)
-    JWT.encode(payload, Rails.application.secrets.secret_key_base)
+    JWT.encode(payload, Rails.application.secret_key_base)
   end
 
   # Decode the JWT to get the user email
   def self.decode(token)
-    JWT.decode(token, Rails.application.secrets.secret_key_base)
+    JWT.decode(token, Rails.application.secret_key_base)
   end
 
   # Validates the payload hash for expiration and meta claims
