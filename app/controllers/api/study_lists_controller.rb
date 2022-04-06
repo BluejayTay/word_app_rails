@@ -97,7 +97,7 @@ class Api::StudyListsController < ApplicationController
     @study_list = StudyList.find(params[:id])
   end
 
-  def validate_params
-    # raise if (submitted_words.length < 1) || (submitted_words.length > 10) || (params[:study_list][:title].blank?)
-  end
+  # def validate_params
+  #   raise if ((params[:words]).length < 1) || ((params[:words]).length > 10) || (params[:study_list][:title].blank?)
+  # end
 end
