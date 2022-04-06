@@ -43,6 +43,7 @@ class Api::StudyListsController < ApplicationController
   def create # POST api/study_lists
     @study_list = StudyList.create(study_list_params)
 
+    submitted_words = params[:words]
     submitted_words.each do |word|
       if Word.find_by(name: word)
         databased_word = Word.find_by(name: word)
@@ -94,10 +95,6 @@ class Api::StudyListsController < ApplicationController
 
   def set_list
     @study_list = StudyList.find(params[:id])
-  end
-
-  def submitted_words
-    params[:words]
   end
 
   def validate_params
