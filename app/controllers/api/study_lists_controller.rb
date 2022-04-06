@@ -43,19 +43,21 @@ class Api::StudyListsController < ApplicationController
   def create # POST api/study_lists
     @study_list = StudyList.create(study_list_params)
 
-    submitted_words.each do |word|
-      if Word.find_by(name: word)
-        databased_word = Word.find_by(name: word)
-        words << databased_word 
-      elsif result = ThesaurusService.look_up(word)
-        new_word = Word.create!(name: result['meta']['id'], definition: result['shortdef'].join("; ").to_s)
-        words << new_word
-        synonyms_result = result['meta']['syns'][0]
-        synonyms_result.each do |synonym|
-          new_or_databased_synonym = Synonym.find_or_create_by!(name: synonym)
-          new_word.synonyms << new_or_databased_synonym
+    if submitted_words
+      submitted_words.each do |word|
+        if Word.find_by(name: word)
+          databased_word = Word.find_by(name: word)
+          words << databased_word 
+        elsif result = ThesaurusService.look_up(word)
+          new_word = Word.create!(name: result['meta']['id'], definition: result['shortdef'].join("; ").to_s)
+          words << new_word
+          synonyms_result = result['meta']['syns'][0]
+          synonyms_result.each do |synonym|
+            new_or_databased_synonym = Synonym.find_or_create_by!(name: synonym)
+            new_word.synonyms << new_or_databased_synonym
+          end
+        else next
         end
-      else next
       end 
     end
 
