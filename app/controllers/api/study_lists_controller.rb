@@ -1,7 +1,7 @@
 class Api::StudyListsController < ApplicationController
   before_action :authenticate_request!, except: [:new_game, :index, :update]
   before_action :set_list, only: [:new_game, :show, :update, :destroy]
-  before_action :validate_params, only: :create
+  #before_action :validate_params, only: :create
 
   def new_game # GET api/study_lists/:id/new_game
     @game_synonyms = []
@@ -43,24 +43,22 @@ class Api::StudyListsController < ApplicationController
   def create # POST api/study_lists
     @study_list = StudyList.create(study_list_params)
 
-    if submitted_words
-      submitted_words.each do |word|
-        if Word.find_by(name: word)
-          databased_word = Word.find_by(name: word)
-          words << databased_word 
-        elsif result = ThesaurusService.look_up(word)
-          new_word = Word.create!(name: result['meta']['id'], definition: result['shortdef'].join("; ").to_s)
-          words << new_word
-          synonyms_result = result['meta']['syns'][0]
-          synonyms_result.each do |synonym|
-            new_or_databased_synonym = Synonym.find_or_create_by!(name: synonym)
-            new_word.synonyms << new_or_databased_synonym
-          end
-        else next
+    submitted_words.each do |word|
+      if Word.find_by(name: word)
+        databased_word = Word.find_by(name: word)
+        words << databased_word
+      elsif result = ThesaurusService.look_up(word)
+        new_word = Word.create!(name: result['meta']['id'], definition: result['shortdef'].join("; ").to_s)
+        words << new_word
+        synonyms_result = result['meta']['syns'][0]
+        synonyms_result.each do |synonym|
+          new_or_databased_synonym = Synonym.find_or_create_by!(name: synonym)
+          new_word.synonyms << new_or_databased_synonym
         end
-      end 
+      else next
+      end
     end
-
+  
     render json: {study_list: {title: @study_list.title, words: words}}
   end
   
@@ -103,6 +101,6 @@ class Api::StudyListsController < ApplicationController
   end
 
   def validate_params
-    raise if submitted_words.empty? || (submitted_words.length > 10) || (params[:study_list][:title].blank?)
+    # raise if (submitted_words.length < 1) || (submitted_words.length > 10) || (params[:study_list][:title].blank?)
   end
 end
