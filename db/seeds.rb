@@ -5,9 +5,9 @@
 #
 #   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
 #   Character.create(name: 'Luke', movie: movies.first)
-#StudyList.destroy_all
-#Word.destroy_all
-#Synonym.destroy_all
+StudyList.destroy_all
+Word.destroy_all
+Synonym.destroy_all
 
 beginner_list = StudyList.create({title: "Beginner Blurbs"}) 
 beginner_words = ["Hot", "Cold", "Big", "Small", "Happy", "Sad", "Near", "Far", "Empty", "Full"]
