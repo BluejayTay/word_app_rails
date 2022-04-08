@@ -1,7 +1,7 @@
 class Api::StudyListsController < ApplicationController
   before_action :authenticate_request!, except: [:new_game, :index, :update]
   before_action :set_list, only: [:new_game, :show, :update, :destroy]
-  #before_action :validate_params, only: :create
+  before_action :validate_params, only: :create
 
   def new_game # GET api/study_lists/:id/new_game
     @game_synonyms = []
@@ -48,7 +48,10 @@ class Api::StudyListsController < ApplicationController
       if Word.find_by(name: word)
         databased_word = Word.find_by(name: word)
         words << databased_word
-      elsif result = ThesaurusService.look_up(word)
+      else 
+        result = ThesaurusService.look_up(word)
+        next if result == "Error: Word not found"
+
         new_word = Word.create!(name: result['meta']['id'], definition: result['shortdef'].join("; ").to_s)
         words << new_word
         synonyms_result = result['meta']['syns'][0]
@@ -56,7 +59,6 @@ class Api::StudyListsController < ApplicationController
           new_or_databased_synonym = Synonym.find_or_create_by!(name: synonym)
           new_word.synonyms << new_or_databased_synonym
         end
-      else next
       end
     end
   
@@ -97,7 +99,7 @@ class Api::StudyListsController < ApplicationController
     @study_list = StudyList.find(params[:id])
   end
 
-  # def validate_params
-  #   raise if ((params[:words]).length < 1) || ((params[:words]).length > 10) || (params[:study_list][:title].blank?)
-  # end
+  def validate_params
+    raise if params[:words].empty? || params[:words].length > 10 || params[:study_list][:title].blank?
+  end
 end
