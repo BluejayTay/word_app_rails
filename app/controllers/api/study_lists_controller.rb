@@ -45,7 +45,7 @@ class Api::StudyListsController < ApplicationController
    
     submitted_words = params[:words]
     submitted_words.each do |word|
-      name = word.downcase.strip
+      name = word.downcase.delete(" ")
       if databased_word = Word.find_by(name: name)
         words << databased_word
       else 
