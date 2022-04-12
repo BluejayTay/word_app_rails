@@ -45,11 +45,11 @@ class Api::StudyListsController < ApplicationController
 
     submitted_words = params[:words]
     submitted_words.each do |word|
-      if Word.find_by(name: word)
-        databased_word = Word.find_by(name: word)
+      if Word.find_by(name: word.downcase)
+        databased_word = Word.find_by(name: word.downcase)
         words << databased_word
       else 
-        result = ThesaurusService.look_up(word)
+        result = ThesaurusService.look_up(word.downcase)
         next if result == "Error: Word not found"
 
         new_word = Word.create!(name: result['meta']['id'], definition: result['shortdef'].join("; ").to_s)
@@ -61,10 +61,16 @@ class Api::StudyListsController < ApplicationController
         end
       end
     end
-  
-    render json: {study_list: {title: @study_list.title, words: words}}
+
+    if invalid_words_count
+      handle_invalid_list
+      raise
+    else
+      render json: {study_list: {title: @study_list.title, words: words}} 
+    end
+
   end
-  
+
   def update #PATCH/PUT api/study_lists/:id
     if @study_list.update(study_list_params)
       render json: @study_list
@@ -97,6 +103,16 @@ class Api::StudyListsController < ApplicationController
 
   def set_list
     @study_list = StudyList.find(params[:id])
+  end
+
+  def handle_invalid_list
+    StudyList.transaction do
+    @study_list.destroy
+    end
+  end
+
+  def invalid_words_count
+    words.count == 0 || words.count > 10
   end
 
   def validate_params
