@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateStudyLists < ActiveRecord::Migration[6.1]
   def change
     create_table :study_lists do |t|

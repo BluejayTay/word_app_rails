@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateJoinTableSynonymWord < ActiveRecord::Migration[6.1]
   def change
     create_join_table :synonyms, :words do |t|
