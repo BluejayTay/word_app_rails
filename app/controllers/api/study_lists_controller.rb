@@ -1,7 +1,7 @@
 class Api::StudyListsController < ApplicationController
   before_action :authenticate_request!, except: [:new_game, :index, :update]
   before_action :set_list, only: [:new_game, :show, :update, :destroy]
-  before_action :validate_params, only: :create
+  # before_action :validate_params, only: :create
 
   def new_game # GET api/study_lists/:id/new_game
     @game_synonyms = []
@@ -42,11 +42,10 @@ class Api::StudyListsController < ApplicationController
   
   def create # POST api/study_lists
     @study_list = StudyList.create(study_list_params)
-
+   
     submitted_words = params[:words]
     submitted_words.each do |word|
-      if Word.find_by(name: word.downcase)
-        databased_word = Word.find_by(name: word.downcase)
+      if databased_word = Word.find_by(name: word.downcase)
         words << databased_word
       else 
         result = ThesaurusService.look_up(word.downcase)
@@ -54,21 +53,21 @@ class Api::StudyListsController < ApplicationController
 
         new_word = Word.create!(name: result['meta']['id'], definition: result['shortdef'].join("; ").to_s)
         words << new_word
+
         synonyms_result = result['meta']['syns'][0]
         synonyms_result.each do |synonym|
-          new_or_databased_synonym = Synonym.find_or_create_by!(name: synonym)
-          new_word.synonyms << new_or_databased_synonym
+          new_word.synonyms << Synonym.find_or_create_by!(name: synonym)
         end
       end
     end
+    
+    if @study_list.invalid_word_count?
+      destroy_invalid_list
 
-    if invalid_words_count
-      handle_invalid_list
       raise
     else
       render json: {study_list: {title: @study_list.title, words: words}} 
     end
-
   end
 
   def update #PATCH/PUT api/study_lists/:id
@@ -77,10 +76,6 @@ class Api::StudyListsController < ApplicationController
     else
       render json: @study_list.errors, status: :unprocessable_entity
     end
-  end
-
-  def destroy #DELETE api/study_lists/:id
-    @study_list.destroy
   end
 
   private
@@ -105,17 +100,13 @@ class Api::StudyListsController < ApplicationController
     @study_list = StudyList.find(params[:id])
   end
 
-  def handle_invalid_list
+  def destroy_invalid_list
     StudyList.transaction do
-    @study_list.destroy
+      @study_list.destroy
     end
   end
 
-  def invalid_words_count
-    words.count == 0 || words.count > 10
-  end
-
-  def validate_params
-    raise if params[:words].empty? || params[:words].length > 10 || params[:study_list][:title].blank?
-  end
+  # def validate_params
+  #   raise if params[:words].empty? || params[:study_list][:title].blank?
+  # end
 end
