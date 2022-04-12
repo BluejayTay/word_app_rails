@@ -1,11 +1,10 @@
 class Api::StudyListsController < ApplicationController
-  before_action :authenticate_request!, except: [:new_game, :index, :update]
-  before_action :set_list, only: [:new_game, :show, :update, :destroy]
-  # before_action :validate_params, only: :create
+  before_action :authenticate_request!, only: :create
+  before_action :set_list, only: [:new_game, :update]
 
-  def new_game # GET api/study_lists/:id/new_game
+  def new_game
     @game_synonyms = []
-    
+
     words.each do |word|
       synonyms = word.synonyms
       synonym_count = synonyms.count
@@ -14,41 +13,38 @@ class Api::StudyListsController < ApplicationController
       end
       @game_synonyms << @game_synonym
     end
-      
+
     render json: {
       study_list: StudyListSerializer.new(@study_list),
-      words: words.map {|word| {id: word.id, name: word.name, definition: word.definition, match_index: words.index(word)}},
-      synonyms: @game_synonyms.map {|synonym| {id: synonym.id, name: synonym.name, match_index: (@game_synonyms.index(synonym))}}
+      words: words.map { |word|
+               { id: word.id, name: word.name, definition: word.definition, match_index: words.index(word) }
+             },
+      synonyms: @game_synonyms.map { |synonym|
+                  { id: synonym.id, name: synonym.name, match_index: (@game_synonyms.index(synonym)) }
+                }
     }
   end
-    
-  def index # GET api/study_lists
+
+  def index
     if payload
       load_current_user!
       @study_lists = base_study_lists + user_study_lists
-    else 
+    else
       @study_lists = base_study_lists
     end
 
     render json: @study_lists
   end
-  
-  def show # GET api/study_lists/:id
-    render json: { 
-      study_list: StudyListSerializer.new(@study_list),
-      words: words.map {|word| WordSerializer.new(word)}
-    }
-  end
-  
-  def create # POST api/study_lists
+
+  def create
     @study_list = StudyList.create(study_list_params)
-   
+
     submitted_words = params[:words]
     submitted_words.each do |word|
       name = word.downcase.delete(" ")
       if databased_word = Word.find_by(name: name)
         words << databased_word
-      else 
+      else
         result = ThesaurusService.look_up(name)
         next if result == "Error: Word not found"
 
@@ -61,17 +57,17 @@ class Api::StudyListsController < ApplicationController
         end
       end
     end
-    
+
     if @study_list.invalid_word_count?
       destroy_invalid_list
 
       raise
     else
-      render json: {study_list: {title: @study_list.title, words: words}} 
+      render json: { study_list: { title: @study_list.title, words: words } }
     end
   end
 
-  def update #PATCH/PUT api/study_lists/:id
+  def update
     if @study_list.update(study_list_params)
       render json: @study_list
     else
@@ -106,8 +102,4 @@ class Api::StudyListsController < ApplicationController
       @study_list.destroy
     end
   end
-
-  # def validate_params
-  #   raise if params[:words].empty? || params[:study_list][:title].blank?
-  # end
 end
