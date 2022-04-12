@@ -45,10 +45,11 @@ class Api::StudyListsController < ApplicationController
    
     submitted_words = params[:words]
     submitted_words.each do |word|
-      if databased_word = Word.find_by(name: word.downcase)
+      name = word.downcase.strip
+      if databased_word = Word.find_by(name: name)
         words << databased_word
       else 
-        result = ThesaurusService.look_up(word.downcase)
+        result = ThesaurusService.look_up(name)
         next if result == "Error: Word not found"
 
         new_word = Word.create!(name: result['meta']['id'], definition: result['shortdef'].join("; ").to_s)
