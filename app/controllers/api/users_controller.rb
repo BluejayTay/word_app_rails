@@ -3,9 +3,8 @@
 module Api
   class UsersController < ApplicationController
     before_action :authenticate_request!, only: %i[auto_login show]
-    before_action :validate_params, only: :create
+    before_action :validate_params, only: %i[create login]
 
-    # POST api/users
     def create
       user = User.new(user_params)
 
@@ -17,7 +16,6 @@ module Api
       end
     end
 
-    # POST api/users/login
     def login
       user = User.find_by(email: email)
 
@@ -29,7 +27,6 @@ module Api
       end
     end
 
-    # GET api/users/auto_login
     def auto_login
       render json: { user: { id: @current_user.id, email: @current_user.email } } if payload
     end
