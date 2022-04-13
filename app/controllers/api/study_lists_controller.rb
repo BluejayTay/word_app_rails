@@ -19,12 +19,8 @@ module Api
 
       render json: {
         study_list: StudyListSerializer.new(@study_list),
-        words: words.map do |word|
-                 { id: word.id, name: word.name, definition: word.definition, match_index: words.index(word) }
-               end,
-        synonyms: @game_synonyms.map do |synonym|
-                    { id: synonym.id, name: synonym.name, match_index: @game_synonyms.index(synonym) }
-                  end
+        words: words_with_match_index,
+        synonyms: game_synonyms_with_match_index
       }
     end
 
@@ -51,7 +47,7 @@ module Api
           result = ThesaurusService.look_up(name)
           next if result == 'Error: Word not found'
 
-          new_word = Word.create!(name: result['meta']['id'], definition: result['shortdef'].join('; ').to_s)
+          new_word = Word.create!(name: name, definition: result['shortdef'].join('; ').to_s)
           words << new_word
 
           synonyms_result = result['meta']['syns'][0]
@@ -62,9 +58,7 @@ module Api
       end
 
       if @study_list.invalid_word_count?
-        destroy_invalid_list
-
-        raise
+        destroy_list_and_raise_error
       else
         render json: { study_list: { title: @study_list.title, words: words } }
       end
@@ -103,6 +97,24 @@ module Api
     def destroy_invalid_list
       StudyList.transaction do
         @study_list.destroy
+      end
+    end
+
+    def destroy_list_and_raise_error
+      destroy_invalid_list
+
+      raise
+    end
+
+    def words_with_match_index
+      words.map do |word|
+        { id: word.id, name: word.name, definition: word.definition, match_index: words.index(word) }
+      end
+    end
+
+    def game_synonyms_with_match_index
+      @game_synonyms.map do |synonym|
+        { id: synonym.id, name: synonym.name, match_index: @game_synonyms.index(synonym) }
       end
     end
   end
