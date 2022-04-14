@@ -19,8 +19,8 @@ module Api
 
       render json: {
         study_list: StudyListSerializer.new(@study_list),
-        words: words_with_match_index,
-        synonyms: game_synonyms_with_match_index
+        words: words_and_match_indices,
+        synonyms: game_synonyms_and_match_indices
       }
     end
 
@@ -46,11 +46,11 @@ module Api
         else
           result = ThesaurusService.look_up(name)
           next if result == 'Error: Word not found'
-
-          new_word = Word.create!(name: name, definition: result['shortdef'].join('; ').to_s)
+          
+          new_word = Word.create!(name: name, definition: result['shortdef'].join('; '))
           words << new_word
 
-          synonyms_result = result['meta']['syns'][0]
+          synonyms_result = result['meta']['syns'].flatten
           synonyms_result.each do |synonym|
             new_word.synonyms << Synonym.find_or_create_by!(name: synonym)
           end
@@ -106,13 +106,13 @@ module Api
       raise
     end
 
-    def words_with_match_index
+    def words_and_match_indices
       words.map do |word|
         { id: word.id, name: word.name, definition: word.definition, match_index: words.index(word) }
       end
     end
 
-    def game_synonyms_with_match_index
+    def game_synonyms_and_match_indices
       @game_synonyms.map do |synonym|
         { id: synonym.id, name: synonym.name, match_index: @game_synonyms.index(synonym) }
       end
