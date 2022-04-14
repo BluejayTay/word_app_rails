@@ -12,10 +12,10 @@ Word.destroy_all
 Synonym.destroy_all
 
 beginner_list = StudyList.create({ title: 'Beginner Blurbs' })
-beginner_words = %w[Hot Cold Big Small Happy Sad Near Far Empty Full]
+beginner_words = ["hot", "cold", "big", "small", "happy", "sad", "near", "far", "empty", "full"]
 beginner_words.each do |word|
   result = ThesaurusService.look_up(word)
-  new_word = Word.create!(name: result['meta']['id'], definition: result['shortdef'].join('; ').to_s)
+  new_word = Word.create!(name: word, definition: result['shortdef'].join('; ').to_s)
   beginner_list.words << new_word
   synonyms_result = result['meta']['syns'][0]
   synonyms_result.each do |synonym|
@@ -25,10 +25,10 @@ beginner_words.each do |word|
 end
 
 crossword_list = StudyList.create({ title: 'Crossword Commodities' })
-crossword_words = %w[Ante Bane Cabal Dyad Haft Icon Iota Meld Onus Skew]
+crossword_words = ["ante", "bane", "cabal", "dyad", "haft", "icon", "iota", "meld", "onus", "skew"]
 crossword_words.each do |word|
   result = ThesaurusService.look_up(word)
-  new_word = Word.create!(name: result['meta']['id'], definition: result['shortdef'].join('; ').to_s)
+  new_word = Word.create!(name: word definition: result['shortdef'].join('; ').to_s)
   crossword_list.words << new_word
   synonyms_result = result['meta']['syns'][0]
   synonyms_result.each do |synonym|
@@ -38,11 +38,10 @@ crossword_words.each do |word|
 end
 
 ivy_list = StudyList.create({ title: 'Ivy League Idiums' })
-ivy_words = %w[Abate Abjure Benevolent Deplore Ephemeral Gregarious Lilliputian Perfidious
-               Rancorous Venerable]
+ivy_words = ["abate", "abjure", "benevolent", "deplore", "ephemeral", "gregarious", "lilliputian", "perfidious", "rancorous", "venerable"]
 ivy_words.each do |word|
   result = ThesaurusService.look_up(word)
-  new_word = Word.create!(name: result['meta']['id'], definition: result['shortdef'].join('; ').to_s)
+  new_word = Word.create!(name: word, definition: result['shortdef'].join('; ').to_s)
   ivy_list.words << new_word
   synonyms_result = result['meta']['syns'][0]
   synonyms_result.each do |synonym|
