@@ -11,7 +11,7 @@ beginner_list = StudyList.create({ title: 'Beginner Blurbs' })
 beginner_words = ['hot', 'cold', 'big', 'small', 'happy', 'sad', 'near', 'far', 'empty', 'full']
 beginner_words.each do |word|
   result = ThesaurusService.look_up(word)
-  new_word = Word.create!(name: word, definition: result['shortdef'].join('; ').to_s)
+  new_word = Word.create!(name: word, definition: result['shortdef'].join('; '))
   beginner_list.words << new_word
   synonyms_result = result['meta']['syns'][0]
   synonyms_result.each do |synonym|
@@ -24,7 +24,7 @@ crossword_list = StudyList.create({ title: 'Crossword Commodities' })
 crossword_words = ['ante', 'bane', 'cabal', 'dyad', 'haft', 'icon', 'iota', 'meld', 'onus', 'skew']
 crossword_words.each do |word|
   result = ThesaurusService.look_up(word)
-  new_word = Word.create!(name: word definition: result['shortdef'].join('; ').to_s)
+  new_word = Word.create!(name: word, definition: result['shortdef'].join('; '))
   crossword_list.words << new_word
   synonyms_result = result['meta']['syns'][0]
   synonyms_result.each do |synonym|
@@ -37,7 +37,7 @@ ivy_list = StudyList.create({ title: 'Ivy League Idiums' })
 ivy_words = ['abate', 'abjure', 'benevolent', 'deplore', 'ephemeral', 'gregarious', 'lilliputian', 'perfidious', 'rancorous', 'venerable']
 ivy_words.each do |word|
   result = ThesaurusService.look_up(word)
-  new_word = Word.create!(name: word, definition: result['shortdef'].join('; ').to_s)
+  new_word = Word.create!(name: word, definition: result['shortdef'].join('; '))
   ivy_list.words << new_word
   synonyms_result = result['meta']['syns'][0]
   synonyms_result.each do |synonym|
