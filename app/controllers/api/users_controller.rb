@@ -38,7 +38,7 @@ module Api
     end
 
     def email
-      user_params[:email]
+      user_params[:email].downcase
     end
 
     def password
