@@ -47,13 +47,13 @@ Built with:
 ## Screenshot-Mobile
 
 <p align="center">
-<img src="src/screenshot-mobile.png"  height="500">
+<img src="screenshot-mobile.png"  height="500">
 </p>
 
 ## Screenshot-Desktop
 
 <p align="center">
-<img src="src/screenshot-desktop.png"  height="500">
+<img src="screenshot-desktop.png"  height="500">
 </p>
 
 #
