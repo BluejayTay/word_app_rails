@@ -11,10 +11,8 @@ module Api
       words.each do |word|
         synonyms = word.synonyms
         synonym_count = synonyms.count
-        synonyms.each_with_index do |_synonym, _index|
-          @game_synonym = synonyms[(rand(synonym_count))]
-        end
-        @game_synonyms << @game_synonym
+        game_synonym = synonyms[(rand(synonym_count))]
+        @game_synonyms << game_synonym
       end
 
       render json: {
@@ -25,43 +23,37 @@ module Api
     end
 
     def index
-      if payload
-        load_current_user!
-        @study_lists = base_study_lists + user_study_lists
-      else
-        @study_lists = base_study_lists
-      end
-
-      render json: @study_lists
+      study_lists = base_study_lists
+      study_lists += user_study_lists if payload
+      
+      render json: study_lists
     end
 
     def create
       @study_list = StudyList.create(study_list_params)
 
-      submitted_words = params[:words]
       submitted_words.each do |word|
         name = word.downcase.delete(' ')
-        if databased_word = Word.find_by(name: name)
-          words << databased_word
+
+        existing_word = Word.find_by(name: name)
+        if existing_word
+          words << existing_word
         else
           result = ThesaurusService.look_up(name)
           next if result == 'Error: Word not found'
-          
-          new_word = Word.create!(name: name, definition: result['shortdef'].join('; '))
-          words << new_word
+        
+          word_creator(name, result)
+          words << @new_word
 
           synonyms_result = result['meta']['syns'].flatten
           synonyms_result.each do |synonym|
-            new_word.synonyms << Synonym.find_or_create_by!(name: synonym)
+            @new_word.synonyms << Synonym.find_or_create_by!(name: synonym)
           end
         end
       end
 
-      if @study_list.invalid_word_count?
-        destroy_list_and_raise_error
-      else
-        render json: { study_list: { title: @study_list.title, words: words } }
-      end
+      destroy_list_and_raise_error if @study_list.invalid_word_count?
+      render json: { study_list: { title: @study_list.title, words: words } }
     end
 
     def update
@@ -75,6 +67,8 @@ module Api
     private
 
     def user_study_lists
+      load_current_user!
+
       StudyList.all.where(user_id: @current_user.id)
     end
 
@@ -86,6 +80,14 @@ module Api
       params.require(:study_list).permit(:title, :high_score, :user_id)
     end
 
+    def submitted_words
+      params[:words]
+    end
+
+    def word_creator(name, result)
+      @new_word = Word.create!(name: name, definition: result['shortdef'].join('; '))
+    end
+
     def words
       @study_list.words
     end
@@ -94,14 +96,8 @@ module Api
       @study_list = StudyList.find(params[:id])
     end
 
-    def destroy_invalid_list
-      StudyList.transaction do
-        @study_list.destroy
-      end
-    end
-
     def destroy_list_and_raise_error
-      destroy_invalid_list
+      @study_list.destroy
 
       raise
     end

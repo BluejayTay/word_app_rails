@@ -6,12 +6,8 @@ class StudyList < ApplicationRecord
   validates :title, presence: true, length: { in: 1..30 } 
   validates_uniqueness_of :title, scope: :user_id
   validates :high_score, numericality: { only_integer: true }, allow_blank: true
- 
-  def word_count
-    words.count
-  end
 
   def invalid_word_count?
-    word_count.zero? || word_count > 10
+    words.count.zero? || words.count > 10
   end
 end
