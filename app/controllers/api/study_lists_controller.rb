@@ -31,7 +31,7 @@ module Api
 
     def create
       @study_list = StudyList.create(study_list_params)
-
+      
       submitted_words.each do |word|
         name = word.downcase.delete(' ')
 
@@ -42,12 +42,14 @@ module Api
           result = ThesaurusService.look_up(name)
           next if result == 'Error: Word not found'
         
-          word_creator(name, result)
-          words << @new_word
+          # word_creator(name, result)
+          #WordCreator.new(name: name, result: result).create!
+          new_word = Word.create!(name: name, definition: result['shortdef'].join('; '))
+          words << new_word
 
           synonyms_result = result['meta']['syns'].flatten
           synonyms_result.each do |synonym|
-            @new_word.synonyms << Synonym.find_or_create_by!(name: synonym)
+            new_word.synonyms << Synonym.find_or_create_by!(name: synonym)
           end
         end
       end
@@ -84,9 +86,11 @@ module Api
       params[:words]
     end
 
-    def word_creator(name, result)
-      @new_word = Word.create!(name: name, definition: result['shortdef'].join('; '))
-    end
+    # def word_creator(name, result)
+    #   @name = name
+    #   @result = result
+    #   @new_word = Word.create!(name: @name, definition: @result['shortdef'].join('; '))
+    # end
 
     def words
       @study_list.words
