@@ -3,7 +3,7 @@
 class User < ApplicationRecord
   has_secure_password
 
-  has_many :study_lists
+  has_many :study_lists, dependent: :destroy
   validates :email, presence: true, uniqueness: true
   before_validation :normalize_email
   validates :password_digest, presence: true
