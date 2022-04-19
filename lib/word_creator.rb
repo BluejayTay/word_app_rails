@@ -8,7 +8,7 @@ class WordCreator
   def create!
     word = Word.create!(name: @name, definition: @result['shortdef'].join('; '))
     add_synonyms
-    return word
+    word
   end
 
   def add_synonyms
