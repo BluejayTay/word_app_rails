@@ -42,8 +42,8 @@ module Api
           result = ThesaurusService.look_up(name)
           next if result == 'Error: Word not found'
         
-          word_creator(name, result)
-          words << @new_word
+          new_word = WordCreator.new(name, result).create!
+          words << new_word
         end
       end
 
@@ -78,15 +78,6 @@ module Api
     def submitted_words
       params[:words]
     end
-
-    def word_creator(name, result)
-      @new_word = Word.create!(name: name, definition: result['shortdef'].join('; '))
-      
-      synonyms_result = result['meta']['syns'].flatten
-      synonyms_result.each do |synonym|
-        @new_word.synonyms << Synonym.find_or_create_by!(name: synonym)
-      end
-    end 
 
     def words
       @study_list.words
