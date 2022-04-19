@@ -27,7 +27,7 @@ class JsonWebToken
   # Default options to be encoded in the token
   def self.meta
     {
-      exp: 2.days.from_now.to_i,
+      exp: 1.hour.from_now.to_i,
       iss: 'WerdNerd',
       aud: 'client'
     }
