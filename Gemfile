@@ -34,6 +34,7 @@ group :development, :test do
   gem 'factory_bot_rails'
   gem 'pry'
   gem 'rspec-rails', '~> 5.0.0'
+  gem 'webmock'
 end
 
 group :development do
@@ -44,7 +45,7 @@ group :development do
 end
 
 group :test do
-  gem 'database_cleaner-active_record'
+  gem 'database_cleaner'
   gem 'shoulda-matchers'
 end
 
